@@ -1,11 +1,10 @@
 // lib/accessControl.ts
-import { PLAN_LIMITS, PlanName, UserStatus, PlanLimits } from "./planConfig";
-import { db } from "@/db/db";
-import { usersTable } from "@/db/schema";
-import { eq } from "drizzle-orm";
+
+import { supabaseAdmin } from "./supabaseAdmin";
+import { PLAN_LIMITS, PlanName, PlanLimits, UserStatus } from "./planConfig";
 
 export interface UserPlanContext {
-  userId: string;        // auth.users.id
+  userId: string;
   email: string | null;
   name: string | null;
   plan: PlanName;
@@ -14,23 +13,24 @@ export interface UserPlanContext {
 }
 
 export async function getUserPlanContext(userId: string): Promise<UserPlanContext> {
-  const [row] = await db
-    .select()
-    .from(usersTable)
-    .where(eq(usersTable.id, userId))
-    .limit(1);
+  const { data, error } = await supabaseAdmin
+    .from("users_table")
+    .select("id, email, name, plan, status")
+    .eq("id", userId)
+    .single();
 
-  if (!row) {
+  if (error || !data) {
+    console.error("getUserPlanContext error", error);
     throw new Error("User not found in users_table");
   }
 
-  const plan = (row.plan ?? "free") as PlanName;
-  const status = (row.status ?? "pending") as UserStatus;
+  const plan = (data.plan ?? "free") as PlanName;
+  const status = (data.status ?? "pending") as UserStatus;
 
   return {
-    userId,
-    email: row.email ?? null,
-    name: row.name ?? null,
+    userId: data.id,
+    email: data.email ?? null,
+    name: data.name ?? null,
     plan,
     status,
     limits: PLAN_LIMITS[plan],
