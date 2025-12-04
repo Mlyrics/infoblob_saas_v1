@@ -1,4 +1,5 @@
 // lib/planConfig.ts
+
 export type PlanName = "free" | "basic" | "pro" | "agency";
 export type UserStatus = "pending" | "active" | "inactive";
 
