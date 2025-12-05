@@ -12,25 +12,22 @@ import {
 export default async function Account() {
   const supabase = createClient();
 
-  // 1. Get auth user first
   const user = await getUser(supabase);
-
   if (!user) {
     return redirect('/signin');
   }
 
-  // 2. In parallel, get profile + subscription
   const [userDetails, subscription] = await Promise.all([
     getUserDetails(supabase),
     getSubscription(supabase)
   ]);
 
-  // 3. Get plan + status from your custom users_table
-  const { data: userPlanRow } = await supabase
+  // 🔹 use `as any` here to avoid TS complaining about users_table
+  const { data: userPlanRow } = await (supabase as any)
     .from('users_table')
     .select('plan, status')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
 
   const plan = userPlanRow?.plan ?? 'free';
   const status = userPlanRow?.status ?? 'inactive';
@@ -48,7 +45,6 @@ export default async function Account() {
         </div>
       </div>
 
-      {/* Subscription summary from users_table */}
       <div className="max-w-6xl px-4 mx-auto sm:px-6 lg:px-8 pb-4">
         <div className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-4 sm:p-6">
           <h2 className="text-lg font-semibold text-white mb-2">
@@ -61,13 +57,12 @@ export default async function Account() {
             <span className="font-medium">Status:</span> {status}
           </p>
 
-          {/* Simple feature gating example */}
           {plan === 'Agency' && (
             <p className="mt-3 text-sm text-emerald-400">
               🔥 Agency plan – all features unlocked.
             </p>
           )}
-          {(plan === 'Pro' || plan === 'Agency') && plan !== 'Basic' && (
+          {(plan === 'Pro' || plan === 'Agency') && (
             <p className="mt-1 text-sm text-yellow-400">
               ⭐ Pro+ features enabled.
             </p>
@@ -85,7 +80,6 @@ export default async function Account() {
         </div>
       </div>
 
-      {/* Existing forms (no change) */}
       <div className="p-4">
         <CustomerPortalForm subscription={subscription} />
         <NameForm userName={userDetails?.full_name ?? ''} />
