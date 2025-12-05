@@ -5,6 +5,7 @@ import {
   getSubscription,
   getUser
 } from '@/utils/supabase/queries';
+import { redirect } from 'next/navigation';
 
 export default async function HomePage() {
   const supabase = createClient();
@@ -14,7 +15,12 @@ export default async function HomePage() {
     getSubscription(supabase)
   ]);
 
-  const primaryCtaHref = user ? '/account' : '/signin';
+  // 🔹 Logged-in users go straight to their dashboard
+  if (user) {
+    return redirect('/account');
+  }
+
+  const primaryCtaHref = '/signin';
   const secondaryCtaHref = '#pricing';
 
   return (
@@ -45,7 +51,7 @@ export default async function HomePage() {
                 href={primaryCtaHref}
                 className="inline-flex items-center justify-center rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-black shadow hover:bg-zinc-100 transition"
               >
-                {user ? 'Go to your account' : 'Get started free'}
+                Get started free
               </a>
               <a
                 href={secondaryCtaHref}
@@ -237,7 +243,7 @@ export default async function HomePage() {
               href={primaryCtaHref}
               className="inline-flex w-full justify-center rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-black hover:bg-zinc-100 transition"
             >
-              {user ? 'Open your account' : 'Start your first feed'}
+              Start your first feed
             </a>
             <p className="mt-3 text-xs text-zinc-500">
               You can switch plans or cancel anytime in your account portal.
