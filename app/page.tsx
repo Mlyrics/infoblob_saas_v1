@@ -17,7 +17,7 @@ export default async function HomePage() {
 
   // 🔹 Logged-in users go straight to their dashboard
   if (user) {
-    return redirect('/account');
+    return redirect('/dashboard'); // ⬅️ changed from '/account' to '/dashboard'
   }
 
   const primaryCtaHref = '/signin';
