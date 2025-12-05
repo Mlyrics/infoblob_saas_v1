@@ -1,4 +1,4 @@
-# Next.js Subscription Payments Starter
+# Next.js Subscription Payments Starter - InfoBlob SaaS
 
 
 > [!WARNING]  
