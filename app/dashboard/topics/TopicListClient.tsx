@@ -30,7 +30,8 @@ export default function TopicListClient({
   plan,
   userId
 }: Props) {
-  const supabase = createClient();
+  // Cast supabase to any to allow calling tables not included in the generated types
+  const supabase: any = createClient();
   const initialMap: Record<
     string,
     { is_active: boolean; custom_tags: string; rss_url: string }
