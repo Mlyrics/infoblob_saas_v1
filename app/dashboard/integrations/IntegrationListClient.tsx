@@ -24,7 +24,7 @@ export default function IntegrationListClient({
   plan,
   userId
 }: Props) {
-  const supabase = createClient();
+  const supabase: any = createClient();
   const isFree = plan?.toLowerCase() === 'free';
   const channels = ['ghost', 'wordpress', 'twitter', 'webhook'];
 
