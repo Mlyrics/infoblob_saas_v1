@@ -8,6 +8,7 @@ import { createServerClient } from '@supabase/ssr';
  */
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
+
   // Create a Supabase client; cookies API differs in middleware
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -21,15 +22,18 @@ export async function middleware(req: NextRequest) {
       }
     }
   );
+
   const {
     data: { user }
   } = await supabase.auth.getUser();
 
   const pathname = req.nextUrl.pathname;
+  // Only login and signup pages should redirect logged-in users to /dashboard.
+  // '/pricing' is intentionally not included so authenticated users can view the pricing page.
   const isAuthRoute =
     pathname.startsWith('/login') ||
-    pathname.startsWith('/signup') ||
-    pathname.startsWith('/pricing');
+    pathname.startsWith('/signup');
+
   const isDashboardRoute = pathname.startsWith('/dashboard');
 
   // Redirect unauthenticated users away from /dashboard
