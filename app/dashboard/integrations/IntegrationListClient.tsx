@@ -1,3 +1,4 @@
+// app/dashboard/integrations/IntegrationListClient.tsx
 'use client';
 
 import { useState } from 'react';
