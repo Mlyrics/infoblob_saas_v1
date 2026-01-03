@@ -15,7 +15,7 @@ export default async function DashboardPage() {
     return redirect('/signin');
   }
 
-  const [userDetails, subscription] = await Promise.all([
+  const [userDetails] = await Promise.all([
     getUserDetails(supabase),
     getSubscription(supabase)
   ]);
@@ -42,8 +42,7 @@ export default async function DashboardPage() {
       : 'Free';
 
   const hasPaidSubscription =
-    ['basic', 'pro', 'agency'].includes(planKey) &&
-    status === 'active';
+    ['basic', 'pro', 'agency'].includes(planKey) && status === 'active';
 
   const PlanBadge = hasPaidSubscription ? (
     <span className="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-100">
@@ -51,7 +50,7 @@ export default async function DashboardPage() {
     </span>
   ) : (
     <Link
-      href="/#pricing"
+      href="/pricing"
       className="inline-flex items-center rounded-full border border-pink-500/80 bg-zinc-900 px-3 py-1 text-xs font-medium text-pink-200 hover:border-pink-400 hover:text-pink-100 transition"
     >
       Plan: Free · Choose a plan
@@ -95,7 +94,7 @@ export default async function DashboardPage() {
             {PlanBadge}
             {StatusBadge}
             <Link
-              href="/pricing"
+              href="/account"
               className="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-100 hover:bg-zinc-800 transition"
             >
               Manage account &amp; billing
