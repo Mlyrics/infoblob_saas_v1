@@ -1,3 +1,4 @@
+// app/dashboard/topics/TopicListClient.tsx
 'use client';
 
 import { useState } from 'react';
@@ -187,4 +188,3 @@ export default function TopicListClient({
     </div>
   );
 }
-
