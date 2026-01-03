@@ -22,16 +22,12 @@ interface Props {
   userId: string;
 }
 
-/**
- * Client-side component for managing topics.  Free users may activate up to 3 topics and cannot set custom RSS or tags.
- */
 export default function TopicListClient({
   topics,
   userTopics,
   plan,
   userId
 }: Props) {
-  // Cast supabase to any to allow calling tables not included in the generated types
   const supabase: any = createClient();
   const initialMap: Record<
     string,
@@ -62,6 +58,7 @@ export default function TopicListClient({
     });
     return obj;
   });
+
   const isFree = plan?.toLowerCase() === 'free';
   const activeCount = Object.values(state).filter((t) => t.is_active).length;
 
