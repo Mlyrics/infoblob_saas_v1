@@ -95,7 +95,7 @@ export default async function DashboardPage() {
             {PlanBadge}
             {StatusBadge}
             <Link
-              href="/account"
+              href="/pricing"
               className="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-100 hover:bg-zinc-800 transition"
             >
               Manage account &amp; billing
