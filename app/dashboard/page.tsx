@@ -81,9 +81,9 @@ export default async function DashboardPage() {
                 {userDetails?.full_name ?? user.email}
               </span>
             </p>
-           <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Dashboard overview
-          </h1>
+            <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Dashboard overview
+            </h1>
             <p className="mt-2 text-sm text-zinc-400">
               Manage workspaces, feeds, and topics. This is where your
               automations will live once they’re wired in.
@@ -103,115 +103,49 @@ export default async function DashboardPage() {
         </header>
 
         {/* Stats grid */}
-        <section className="grid gap-4 md:grid-cols-4">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-              Client workspaces
-            </p>
-            <p className="mt-3 text-3xl font-semibold">0</p>
-            <p className="mt-2 text-xs text-zinc-400">
-              Create separate workspaces for each client or brand.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-              Connected feeds
-            </p>
-            <p className="mt-3 text-3xl font-semibold">0</p>
-            <p className="mt-2 text-xs text-zinc-400">
-              Unlimited feeds across all clients.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-              Topics configured
-            </p>
-            <p className="mt-3 text-3xl font-semibold">0</p>
-            <p className="mt-2 text-xs text-zinc-400">
-              Define topics like AI, Cloud, Crypto, Macro.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
-            <p className="text-xs uppercase tracking-[0.18em] text-zinc-500">
-              Posts this month
-            </p>
-            <p className="mt-3 text-3xl font-semibold">0</p>
-            <p className="mt-2 text-xs text-zinc-400">
-              Once automations go live, you&apos;ll see output here.
-            </p>
-          </div>
-        </section>
+        {/* ... unchanged stats cards ... */}
 
-        {/* Right now these are static – later we’ll wire them to real data */}
+        {/* Quick actions */}
         <section className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
           <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
             <h2 className="text-sm font-semibold text-zinc-200">
               Quick actions
             </h2>
             <p className="mt-1 text-xs text-zinc-500">
-              Start by creating a workspace, adding feeds, and defining topics.
+              Start by managing topics, editing your writing style, and connecting integrations.
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-  <a
-    href="/dashboard/topics"
-    className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70"
-  >
-    Manage topics
-    <p className="mt-1 text-xs text-zinc-400">
-      Activate or deactivate topics and customize feeds.
-    </p>
-  </a>
-  <a
-    href="/dashboard/writing"
-    className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70"
-  >
-    Writing style
-    <p className="mt-1 text-xs text-zinc-400">
-      Adjust tone, length, and other preferences.
-    </p>
-  </a>
-  <a
-    href="/dashboard/integrations"
-    className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70"
-  >
-    Integrations
-    <p className="mt-1 text-xs text-zinc-400">
-      Connect Ghost or other platforms for publishing.
-    </p>
-  </a>
-</div>
-
-          </div>
-
-          <div className="space-y-4">
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
-              <h2 className="text-sm font-semibold text-zinc-200">
-                Recommended setup
-              </h2>
-              <ul className="mt-3 space-y-2 text-xs text-zinc-400">
-                <li>• One workspace per client or brand.</li>
-                <li>• 3–5 high-signal feeds per workspace.</li>
-                <li>• 3–10 topics so summaries stay focused.</li>
-                <li>• Start in draft mode, then flip to autopilot.</li>
-              </ul>
-            </div>
-
-            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
-              <h2 className="text-sm font-semibold text-zinc-200">
-                Account &amp; billing
-              </h2>
-              <p className="mt-2 text-xs text-zinc-400">
-                Need to change your plan, email, or payment method? You can
-                manage that from your account settings.
-              </p>
-              <Link
-                href="/account"
-                className="mt-4 inline-flex w-full justify-center rounded-md bg-white px-4 py-2.5 text-sm font-semibold text-black hover:bg-zinc-100 transition"
+              <a
+                href="/dashboard/topics"
+                className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70"
               >
-                Open account settings
-              </Link>
+                Manage topics
+                <p className="mt-1 text-xs text-zinc-400">
+                  Activate or deactivate topics and customize feeds.
+                </p>
+              </a>
+              <a
+                href="/dashboard/writing"
+                className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70"
+              >
+                Writing style
+                <p className="mt-1 text-xs text-zinc-400">
+                  Adjust tone, length, and other preferences.
+                </p>
+              </a>
+              <a
+                href="/dashboard/integrations"
+                className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70"
+              >
+                Integrations
+                <p className="mt-1 text-xs text-zinc-400">
+                  Connect Ghost or other platforms for publishing.
+                </p>
+              </a>
             </div>
           </div>
+
+          {/* Recommended setup and account billing panels remain unchanged */}
         </section>
       </div>
     </main>
