@@ -29,6 +29,7 @@ export default function CustomerPortalForm({ subscription }: Props) {
   const currentPath = usePathname();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Format the active subscription price, if any.
   const subscriptionPrice =
     subscription &&
     new Intl.NumberFormat('en-US', {
@@ -37,6 +38,7 @@ export default function CustomerPortalForm({ subscription }: Props) {
       minimumFractionDigits: 0
     }).format((subscription?.prices?.unit_amount || 0) / 100);
 
+  // Redirect the user to the Stripe customer portal to manage their subscription.
   const handleStripePortalRequest = async () => {
     setIsSubmitting(true);
     const redirectUrl = await createStripePortal(currentPath);
@@ -69,7 +71,12 @@ export default function CustomerPortalForm({ subscription }: Props) {
         {subscription ? (
           `${subscriptionPrice}/${subscription?.prices?.interval}`
         ) : (
-          <Link href="/pricing">Choose a plan</Link>
+          // Render a button wrapped in a Link so users can choose a plan
+          <Link href="/pricing">
+            <Button variant="slim" type="button">
+              Choose a plan
+            </Button>
+          </Link>
         )}
       </div>
     </Card>
