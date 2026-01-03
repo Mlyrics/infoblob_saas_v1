@@ -16,10 +16,6 @@ interface Props {
   userId: string;
 }
 
-/**
- * Client component for displaying and toggling integrations.
- * Free plans can enable only the Ghost integration.  Pro plans can enable more.
- */
 export default function IntegrationListClient({
   integrations,
   plan,
@@ -103,13 +99,4 @@ export default function IntegrationListClient({
               </div>
             </div>
             {disabled && (
-              <p className="mt-2 text-xs text-zinc-500">
-                Pro plan required to enable this integration.
-              </p>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+              <p class 
