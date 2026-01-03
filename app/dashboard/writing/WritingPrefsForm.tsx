@@ -1,3 +1,4 @@
+// app/dashboard/writing/WritingPrefsForm.tsx
 'use client';
 
 import { useState } from 'react';
@@ -27,7 +28,8 @@ export default function WritingPrefsForm({
   initialPreset,
   userId
 }: Props) {
-  const supabase = createClient();
+  // Cast supabase to any so we can call tables not in the generated types
+  const supabase: any = createClient();
   const [prefs, setPrefs] = useState<WritingPrefs>(initialPrefs);
   const [preset, setPreset] = useState<string>(initialPreset);
   const [saving, setSaving] = useState(false);
@@ -183,4 +185,3 @@ export default function WritingPrefsForm({
     </form>
   );
 }
-
