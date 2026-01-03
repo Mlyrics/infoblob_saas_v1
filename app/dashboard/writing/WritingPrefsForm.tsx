@@ -20,15 +20,11 @@ interface Props {
   userId: string;
 }
 
-/**
- * Client component for editing writing preferences and personality preset.
- */
 export default function WritingPrefsForm({
   initialPrefs,
   initialPreset,
   userId
 }: Props) {
-  // Cast supabase to any so we can call tables not in the generated types
   const supabase: any = createClient();
   const [prefs, setPrefs] = useState<WritingPrefs>(initialPrefs);
   const [preset, setPreset] = useState<string>(initialPreset);
