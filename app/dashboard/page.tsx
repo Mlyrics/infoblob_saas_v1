@@ -81,9 +81,9 @@ export default async function DashboardPage() {
                 {userDetails?.full_name ?? user.email}
               </span>
             </p>
-            <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Agency dashboard
-            </h1>
+           <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Dashboard overview
+          </h1>
             <p className="mt-2 text-sm text-zinc-400">
               Manage workspaces, feeds, and topics. This is where your
               automations will live once they’re wired in.
@@ -152,33 +152,35 @@ export default async function DashboardPage() {
               Start by creating a workspace, adding feeds, and defining topics.
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <button className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70">
-                Create first workspace
-                <p className="mt-1 text-xs text-zinc-400">
-                  Organize feeds and topics for a specific client or brand.
-                </p>
-              </button>
-              <button className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70">
-                Add RSS feeds
-                <p className="mt-1 text-xs text-zinc-400">
-                  Connect tech &amp; finance sources you want InfoBlob to
-                  monitor.
-                </p>
-              </button>
-              <button className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70">
-                Define topics &amp; tone
-                <p className="mt-1 text-xs text-zinc-400">
-                  Tell us what you care about and how you want summaries to
-                  sound.
-                </p>
-              </button>
-              <button className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70">
-                Configure publishing
-                <p className="mt-1 text-xs text-zinc-400">
-                  Choose Ghost, WordPress, or your own API for publishing.
-                </p>
-              </button>
-            </div>
+  <a
+    href="/dashboard/topics"
+    className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70"
+  >
+    Manage topics
+    <p className="mt-1 text-xs text-zinc-400">
+      Activate or deactivate topics and customize feeds.
+    </p>
+  </a>
+  <a
+    href="/dashboard/writing"
+    className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70"
+  >
+    Writing style
+    <p className="mt-1 text-xs text-zinc-400">
+      Adjust tone, length, and other preferences.
+    </p>
+  </a>
+  <a
+    href="/dashboard/integrations"
+    className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70"
+  >
+    Integrations
+    <p className="mt-1 text-xs text-zinc-400">
+      Connect Ghost or other platforms for publishing.
+    </p>
+  </a>
+</div>
+
           </div>
 
           <div className="space-y-4">
