@@ -31,17 +31,20 @@ export default async function DashboardPage() {
   const rawPlan = userPlanRow?.plan ?? 'free';
   const status = userPlanRow?.status ?? 'inactive';
 
+  // Normalize to lowercase before comparisons
+  const planKey = rawPlan.toLowerCase();
+
   const planLabel =
-    rawPlan === 'Agency'
+    planKey === 'agency'
       ? 'Agency'
-      : rawPlan === 'Pro'
+      : planKey === 'pro'
       ? 'Pro'
-      : rawPlan === 'Basic'
+      : planKey === 'basic'
       ? 'Basic'
       : 'Free';
 
   const hasPaidSubscription =
-    (rawPlan === 'Basic' || rawPlan === 'Pro' || rawPlan === 'Agency') &&
+    ['basic', 'pro', 'agency'].includes(planKey) &&
     status === 'active';
 
   const PlanBadge = hasPaidSubscription ? (
