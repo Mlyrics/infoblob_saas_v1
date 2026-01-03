@@ -11,7 +11,6 @@ import {
 export default async function DashboardPage() {
   const supabase = createClient();
   const user = await getUser(supabase);
-
   if (!user) {
     return redirect('/signin');
   }
@@ -31,9 +30,8 @@ export default async function DashboardPage() {
   const rawPlan = userPlanRow?.plan ?? 'free';
   const status = userPlanRow?.status ?? 'inactive';
 
-  // Normalize to lowercase before comparisons
+  // Normalize plan to lowercase for comparisons
   const planKey = rawPlan.toLowerCase();
-
   const planLabel =
     planKey === 'agency'
       ? 'Agency'
@@ -106,7 +104,7 @@ export default async function DashboardPage() {
         </header>
 
         {/* Stats grid */}
-        {/* ... unchanged stats cards ... */}
+        {/* ... keep your stats components here ... */}
 
         {/* Quick actions */}
         <section className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
