@@ -1,3 +1,4 @@
+// app/dashboard/integrations/IntegrationListClient.tsx
 'use client';
 
 import { useState } from 'react';
@@ -16,10 +17,6 @@ interface Props {
   userId: string;
 }
 
-/**
- * Client component for displaying and toggling integrations.
- * Free plans can enable only the Ghost integration.  Pro plans can enable more.
- */
 export default function IntegrationListClient({
   integrations,
   plan,
@@ -29,7 +26,7 @@ export default function IntegrationListClient({
   const isFree = plan?.toLowerCase() === 'free';
   const channels = ['ghost', 'wordpress', 'twitter', 'webhook'];
 
-  // Initialize state with is_active and config per channel
+  // Build initial state: is_active + config per channel
   const initialState: Record<string, { is_active: boolean; config: any }> = {};
   channels.forEach((ch) => {
     const found = integrations.find((i) => i.channel === ch);
@@ -40,10 +37,10 @@ export default function IntegrationListClient({
   });
   const [state, setState] = useState(initialState);
 
-  // State for Ghost configuration modal
+  // Modal open state for ghost configuration
   const [ghostModalOpen, setGhostModalOpen] = useState(false);
 
-  // Upsert with onConflict set to (customer_id, channel)
+  // Upsert integration to Supabase with conflict resolution
   async function upsertIntegration(
     channel: string,
     fields: { is_active: boolean; config?: any },
@@ -66,7 +63,7 @@ export default function IntegrationListClient({
     }
   }
 
-  // Toggle handler: enforces free-plan rules and opens modal for Ghost
+  // Toggle handler with free-plan gating and ghost setup logic
   const handleToggle = async (channel: string) => {
     const current = state[channel];
     const newValue = !current.is_active;
@@ -78,7 +75,7 @@ export default function IntegrationListClient({
       return;
     }
 
-    // If enabling Ghost and no config saved, show the modal
+    // When enabling Ghost and no config is set, open the modal instead
     if (channel === 'ghost' && newValue) {
       const existingConfig = state.ghost?.config || {};
       if (
@@ -91,7 +88,7 @@ export default function IntegrationListClient({
       }
     }
 
-    // Update local state and persist
+    // Apply state change and persist
     setState((prev) => ({
       ...prev,
       [channel]: { ...prev[channel], is_active: newValue },
@@ -99,19 +96,17 @@ export default function IntegrationListClient({
     await upsertIntegration(channel, { is_active: newValue });
   };
 
-  // When user saves Ghost settings
+  // Save handler for Ghost modal: update config and ensure integration stays active
   const handleGhostSave = async (config: {
     api_url: string;
     admin_key: string;
     content_id: string;
   }) => {
     setGhostModalOpen(false);
-    // Update local state
     setState((prev) => ({
       ...prev,
       ghost: { is_active: true, config },
     }));
-    // Persist with config and is_active=true
     await upsertIntegration('ghost', {
       is_active: true,
       config,
@@ -140,6 +135,16 @@ export default function IntegrationListClient({
                   onChange={() => handleToggle(channel)}
                   disabled={disabled}
                 />
+                {/* Show Edit button for Ghost when active */}
+                {channel === 'ghost' && integration.is_active && (
+                  <button
+                    type="button"
+                    onClick={() => setGhostModalOpen(true)}
+                    className="text-xs underline text-blue-500"
+                  >
+                    Edit
+                  </button>
+                )}
               </div>
             </div>
             {disabled && (
