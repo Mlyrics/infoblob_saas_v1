@@ -1,7 +1,6 @@
 // app/dashboard/page.tsx
-
 import dynamic from 'next/dynamic';
-// ...existing imports...
+// ... existing imports for user/plan fetching ...
 
 const DashboardStatsClient = dynamic(
   () => import('./DashboardStatsClient'),
@@ -9,9 +8,15 @@ const DashboardStatsClient = dynamic(
 );
 
 export default async function DashboardPage() {
-  // ...existing user fetch & plan/status code...
+  const supabase = createClient();
+  const user = await getUser(supabase);
+  if (!user) {
+    return redirect('/signin');
+  }
 
-  // Fetch the summary stats (unchanged from earlier example)
+  // fetch plan/status as before …
+
+  // Fetch the summary stats
   const { data: statsRow } = await supabase
     .from('v_customer_dashboard_stats')
     .select(
@@ -33,7 +38,10 @@ export default async function DashboardPage() {
     .from('v_customer_articles_daily')
     .select('day, generated, delivered')
     .eq('customer_id', user.id)
-    .gte('day', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) // last 30 days
+    .gte(
+      'day',
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    )
     .order('day', { ascending: true });
 
   return (
@@ -41,7 +49,7 @@ export default async function DashboardPage() {
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8 sm:py-14">
         {/* existing header, plan/status badges, etc. */}
 
-        {/* Stats grid moved into client component */}
+        {/* Stats grid */}
         <DashboardStatsClient
           stats={stats}
           dailyData={dailyData ?? []}
