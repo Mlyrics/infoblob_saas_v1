@@ -62,10 +62,7 @@ export default function WritingPrefsForm({
   };
 
   return (
-    <form
-      className="space-y-4 max-w-xl"
-      onSubmit={handleSubmit}
-    >
+    <form className="space-y-4 max-w-xl" onSubmit={handleSubmit}>
       {/* Tone */}
       <div>
         <label className="block text-xs text-zinc-400 mb-1">Tone</label>
@@ -194,7 +191,7 @@ export default function WritingPrefsForm({
           disabled={saving}
           className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-zinc-100 transition"
         >
-          {saving ? 'Saving...' : 'Save preferences'}
+          {saving ? 'Saving…' : 'Save preferences'}
         </button>
       )}
 
