@@ -10,13 +10,13 @@ import {
 } from '@/utils/supabase/queries';
 
 // Dynamically import the client-only stats component (no SSR)
-const DashboardStatsClient = dynamic(
-  () => import('./DashboardStatsClient'),
-  { ssr: false },
-);
+const DashboardStatsClient = dynamic(() => import('./DashboardStatsClient'), {
+  ssr: false,
+});
 
 export default async function DashboardPage() {
-  const supabase = createClient();
+  // Cast Supabase client to any to bypass table/view type restrictions
+  const supabase: any = createClient();
   const user = await getUser(supabase);
   if (!user) {
     return redirect('/signin');
@@ -37,8 +37,8 @@ export default async function DashboardPage() {
   const planKey = (userPlanRow?.plan ?? 'free').toLowerCase();
   const status = userPlanRow?.status ?? 'inactive';
 
-  // Fetch aggregated stats
-  const { data: statsRow } = await supabase
+  // Fetch aggregated stats from v_customer_dashboard_stats
+  const { data: statsRow } = await (supabase as any)
     .from('v_customer_dashboard_stats')
     .select(
       'articles_generated_30d, articles_delivered_30d, active_topics, active_integrations, ai_credits_30d',
@@ -54,8 +54,8 @@ export default async function DashboardPage() {
     aiCredits: statsRow?.ai_credits_30d ?? 0,
   };
 
-  // Fetch daily data for sparkline charts
-  const { data: dailyData } = await supabase
+  // Fetch daily data for sparkline charts from v_customer_articles_daily
+  const { data: dailyData } = await (supabase as any)
     .from('v_customer_articles_daily')
     .select('day, generated, delivered')
     .eq('customer_id', user.id)
@@ -85,9 +85,7 @@ export default async function DashboardPage() {
               automations will live once they’re wired in.
             </p>
           </div>
-
-          {/* Plan and status badges (optional, adjust to your design) */}
-          {/* ... plan/status badge code here ... */}
+          {/* Add plan and status badges or links here if desired */}
         </header>
 
         {/* Stats grid (client-rendered) */}
@@ -97,7 +95,7 @@ export default async function DashboardPage() {
           userId={user.id}
         />
 
-        {/* Quick actions and other sections (unchanged) */}
+        {/* Quick actions and other sections */}
         {/* ... your existing quick action cards ... */}
       </div>
     </main>
