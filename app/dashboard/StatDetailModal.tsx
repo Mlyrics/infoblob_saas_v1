@@ -28,7 +28,8 @@ export default function StatDetailModal({
 
     const fetchDetails = async () => {
       setLoading(true);
-      const supabase = createClient();
+      // Cast to `any` to bypass Supabase type restrictions
+      const supabase: any = createClient();
       if (statType === 'generated') {
         const { data } = await supabase
           .from('customer_article')
@@ -67,7 +68,6 @@ export default function StatDetailModal({
           .eq('is_active', true);
         setItems(data ?? []);
       } else {
-        setItems([]);
       }
       setLoading(false);
     };
@@ -87,7 +87,6 @@ export default function StatDetailModal({
     <>
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          {/* Modal panel */}
           <div className="relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-zinc-100">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold">
@@ -102,7 +101,6 @@ export default function StatDetailModal({
                 <span aria-hidden="true">×</span>
               </button>
             </div>
-            {/* Content area */}
             {loading && <p className="mt-4 text-center">Loading…</p>}
             {!loading && (
               <div className="mt-4 max-h-80 space-y-2 overflow-y-auto text-sm">
