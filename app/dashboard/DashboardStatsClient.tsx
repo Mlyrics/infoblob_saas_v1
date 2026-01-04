@@ -26,7 +26,7 @@ export default function DashboardStatsClient({
   dailyData,
   userId,
 }: Props) {
-  // Convert dailyData into arrays for each metric
+  // Prepare sparkline data
   const generatedTrend = dailyData.map((row) => ({
     date: row.day,
     value: row.generated,
