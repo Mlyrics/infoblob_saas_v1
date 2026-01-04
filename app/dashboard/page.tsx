@@ -1,11 +1,12 @@
 // app/dashboard/page.tsx
+
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
 import {
   getUserDetails,
   getSubscription,
-  getUser
+  getUser,
 } from '@/utils/supabase/queries';
 
 export default async function DashboardPage() {
@@ -15,12 +16,13 @@ export default async function DashboardPage() {
     return redirect('/signin');
   }
 
+  // Load user details and subscription
   const [userDetails] = await Promise.all([
     getUserDetails(supabase),
-    getSubscription(supabase)
+    getSubscription(supabase),
   ]);
 
-  // Read plan/status from your custom users_table
+  // Read plan and status from users_table
   const { data: userPlanRow } = await (supabase as any)
     .from('users_table')
     .select('plan, status')
@@ -30,7 +32,6 @@ export default async function DashboardPage() {
   const rawPlan = userPlanRow?.plan ?? 'free';
   const status = userPlanRow?.status ?? 'inactive';
 
-  // Normalize plan to lowercase for comparisons
   const planKey = rawPlan.toLowerCase();
   const planLabel =
     planKey === 'agency'
@@ -69,6 +70,23 @@ export default async function DashboardPage() {
     </span>
   );
 
+  // Fetch stats from the dashboard view
+  const { data: statsRow } = await (supabase as any)
+    .from('v_customer_dashboard_stats')
+    .select(
+      'articles_generated_30d, articles_delivered_30d, active_topics, active_integrations, ai_credits_30d'
+    )
+    .eq('customer_id', user.id)
+    .maybeSingle();
+
+  const stats = {
+    articlesGenerated: statsRow?.articles_generated_30d ?? 0,
+    articlesDelivered: statsRow?.articles_delivered_30d ?? 0,
+    activeTopics: statsRow?.active_topics ?? 0,
+    activeIntegrations: statsRow?.active_integrations ?? 0,
+    aiCredits: statsRow?.ai_credits_30d ?? 0,
+  };
+
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8 sm:py-14">
@@ -103,14 +121,43 @@ export default async function DashboardPage() {
         </header>
 
         {/* Stats grid */}
-        {/* ... keep your stats components here ... */}
+        <section className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
+            <p className="text-xs text-zinc-400">Articles generated (30d)</p>
+            <p className="mt-2 text-3xl font-extrabold text-zinc-100">
+              {stats.articlesGenerated}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
+            <p className="text-xs text-zinc-400">Articles delivered (30d)</p>
+            <p className="mt-2 text-3xl font-extrabold text-zinc-100">
+              {stats.articlesDelivered}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
+            <p className="text-xs text-zinc-400">Active topics</p>
+            <p className="mt-2 text-3xl font-extrabold text-zinc-100">
+              {stats.activeTopics}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
+            <p className="text-xs text-zinc-400">Integrations connected</p>
+            <p className="mt-2 text-3xl font-extrabold text-zinc-100">
+              {stats.activeIntegrations}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
+            <p className="text-xs text-zinc-400">AI credits used (30d)</p>
+            <p className="mt-2 text-3xl font-extrabold text-zinc-100">
+              {stats.aiCredits}
+            </p>
+          </div>
+        </section>
 
         {/* Quick actions */}
         <section className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
           <div className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5">
-            <h2 className="text-sm font-semibold text-zinc-200">
-              Quick actions
-            </h2>
+            <h2 className="text-sm font-semibold text-zinc-200">Quick actions</h2>
             <p className="mt-1 text-xs text-zinc-500">
               Start by managing topics, editing your writing style, and connecting integrations.
             </p>
@@ -144,8 +191,7 @@ export default async function DashboardPage() {
               </a>
             </div>
           </div>
-
-          {/* Recommended setup and account billing panels remain unchanged */}
+          {/* (other existing panels remain unchanged) */}
         </section>
       </div>
     </main>
