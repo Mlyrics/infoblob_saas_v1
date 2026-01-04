@@ -18,11 +18,11 @@ interface ModalProps {
 }
 
 /**
- * StatDetailModal shows grouped detail rows for a selected stat:
- *  - generated/delivered: groups articles by topic/subtopic and counts them.
+ * StatDetailModal shows a list of items for a selected stat:
+ *  - generated / delivered: counts articles grouped by topic and subtopic.
  *  - topics: lists active topics.
  *  - integrations: lists active integrations.
- *  - aiCredits: reserved for future use.
+ *  - aiCredits: reserved for future expansion.
  */
 export default function StatDetailModal({
   open,
@@ -44,15 +44,41 @@ export default function StatDetailModal({
     const fetchDetails = async () => {
       setLoading(true);
       const supabase: any = createClient();
-      if (statType === 'generated' || statType === 'delivered') {
-        // Fetch raw article rows, then group in the client by topic_code/subtopic
+
+      if (statType === 'generated') {
+        // Fetch all articles created in the last 30 days (no distributed filter)
         const { data, error } = await supabase
           .from('customer_article')
           .select('topic_code, subtopic')
           .eq('customer_id', userId)
-          .eq('distributed', statType === 'delivered')
           .gte(
-            statType === 'generated' ? 'created_at' : 'distributed_at',
+            'created_at',
+            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          );
+        if (error) {
+          console.error(error);
+          setItems([]);
+        } else if (data) {
+          const map: { [key: string]: number } = {};
+          data.forEach((row: any) => {
+            const key = `${row.topic_code}|${row.subtopic || ''}`;
+            map[key] = (map[key] || 0) + 1;
+          });
+          const grouped = Object.entries(map).map(([key, count]) => {
+            const [topic_code, subtopic] = key.split('|');
+            return { topic_code, subtopic: subtopic || null, count };
+          });
+          setItems(grouped);
+        }
+      } else if (statType === 'delivered') {
+        // Fetch only distributed articles created within the last 30 days
+        const { data, error } = await supabase
+          .from('customer_article')
+          .select('topic_code, subtopic')
+          .eq('customer_id', userId)
+          .eq('distributed', true)
+          .gte(
+            'distributed_at',
             new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
           );
         if (error) {
@@ -85,14 +111,17 @@ export default function StatDetailModal({
           .eq('is_active', true);
         setItems(data ?? []);
       } else {
+        // aiCredits or unsupported type
         setItems([]);
       }
+
       setLoading(false);
     };
 
     fetchDetails();
   }, [open, statType, userId]);
 
+  // Titles for each stat type
   const titleMap: Record<string, string> = {
     generated: 'Articles generated (30d)',
     delivered: 'Articles delivered (30d)',
