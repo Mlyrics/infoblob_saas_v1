@@ -18,10 +18,11 @@ interface ModalProps {
 }
 
 /**
- * StatDetailModal displays a list of items related to a selected stat.
- * It shows articles grouped by topic/subtopic for "generated" and "delivered",
- * active topics for "topics", and active integrations for "integrations".
- * "aiCredits" can later be extended if needed.
+ * StatDetailModal shows grouped detail rows for a selected stat:
+ *  - generated/delivered: groups articles by topic/subtopic and counts them.
+ *  - topics: lists active topics.
+ *  - integrations: lists active integrations.
+ *  - aiCredits: reserved for future use.
  */
 export default function StatDetailModal({
   open,
@@ -30,9 +31,10 @@ export default function StatDetailModal({
   userId,
 }: ModalProps) {
   const [loading, setLoading] = useState(false);
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<
+    Array<{ topic_code?: string; subtopic?: string | null; count?: number; channel?: string; is_active?: boolean; config?: any }>
+  >([]);
 
-  // Fetch detail data whenever the modal opens
   useEffect(() => {
     if (!open || !statType) {
       setItems([]);
@@ -41,31 +43,33 @@ export default function StatDetailModal({
 
     const fetchDetails = async () => {
       setLoading(true);
-      // Cast Supabase client to any to bypass table-type restrictions
       const supabase: any = createClient();
-      if (statType === 'generated') {
-        const { data } = await supabase
+      if (statType === 'generated' || statType === 'delivered') {
+        // Fetch raw article rows, then group in the client by topic_code/subtopic
+        const { data, error } = await supabase
           .from('customer_article')
-          .select('topic_code, subtopic, count:count(*)')
+          .select('topic_code, subtopic')
           .eq('customer_id', userId)
+          .eq('distributed', statType === 'delivered')
           .gte(
-            'created_at',
+            statType === 'generated' ? 'created_at' : 'distributed_at',
             new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          )
-          .group('topic_code, subtopic');
-        setItems(data ?? []);
-      } else if (statType === 'delivered') {
-        const { data } = await supabase
-          .from('customer_article')
-          .select('topic_code, subtopic, count:count(*)')
-          .eq('customer_id', userId)
-          .eq('distributed', true)
-          .gte(
-            'distributed_at',
-            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          )
-          .group('topic_code, subtopic');
-        setItems(data ?? []);
+          );
+        if (error) {
+          console.error(error);
+          setItems([]);
+        } else if (data) {
+          const map: { [key: string]: number } = {};
+          data.forEach((row: any) => {
+            const key = `${row.topic_code}|${row.subtopic || ''}`;
+            map[key] = (map[key] || 0) + 1;
+          });
+          const grouped = Object.entries(map).map(([key, count]) => {
+            const [topic_code, subtopic] = key.split('|');
+            return { topic_code, subtopic: subtopic || null, count };
+          });
+          setItems(grouped);
+        }
       } else if (statType === 'topics') {
         const { data } = await supabase
           .from('customer_topics')
@@ -81,7 +85,6 @@ export default function StatDetailModal({
           .eq('is_active', true);
         setItems(data ?? []);
       } else {
-        // For aiCredits or unsupported types, no extra query for now
         setItems([]);
       }
       setLoading(false);
@@ -90,7 +93,6 @@ export default function StatDetailModal({
     fetchDetails();
   }, [open, statType, userId]);
 
-  // Map statType to a human-readable title
   const titleMap: Record<string, string> = {
     generated: 'Articles generated (30d)',
     delivered: 'Articles delivered (30d)',
@@ -103,9 +105,7 @@ export default function StatDetailModal({
     <>
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          {/* Modal panel */}
           <div className="relative w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-950 p-6 text-zinc-100">
-            {/* Modal header */}
             <div className="flex items-center justify-between">
               <h2 className="text-base font-semibold">
                 {statType ? titleMap[statType] : ''}
@@ -119,7 +119,6 @@ export default function StatDetailModal({
                 <span aria-hidden="true">×</span>
               </button>
             </div>
-            {/* Modal content */}
             {loading && <p className="mt-4 text-center">Loading…</p>}
             {!loading && (
               <div className="mt-4 max-h-80 space-y-2 overflow-y-auto text-sm">
@@ -132,13 +131,10 @@ export default function StatDetailModal({
                       className="flex justify-between border-b border-zinc-800 pb-1"
                     >
                       <span>
-                        {/* Show topic code or channel */}
                         {item.topic_code ?? item.channel ?? ''}
-                        {/* Show subtopic if present */}
                         {item.subtopic ? ` / ${item.subtopic}` : ''}
                       </span>
                       <span className="font-semibold">
-                        {/* Show count for generated/delivered lists, tick for topics/integrations */}
                         {item.count ?? item.is_active ? (item.count ?? '✓') : ''}
                       </span>
                     </div>
