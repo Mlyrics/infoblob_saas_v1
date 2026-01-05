@@ -23,8 +23,7 @@ interface Props {
 }
 
 /**
- * Writing preferences form.  Basic plan users can only edit Tone;
- * all other fields are disabled and an upgrade notice is shown instead of the save button.
+ * Writing preferences form. Basic plan: only Tone is editable; all other fields are disabled and the upgrade notice is shown.
  */
 export default function WritingPrefsForm({
   initialPrefs,
@@ -52,7 +51,6 @@ export default function WritingPrefsForm({
     e.preventDefault();
     setSaving(true);
     setMessage(null);
-
     const { error } = await supabase
       .from('users_table')
       .update({
@@ -60,7 +58,6 @@ export default function WritingPrefsForm({
         personality_preset: preset,
       })
       .eq('id', userId);
-
     setSaving(false);
     if (error) {
       setMessage('Error saving preferences: ' + error.message);
@@ -70,131 +67,176 @@ export default function WritingPrefsForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Tone (editable on both plans) */}
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Tone</label>
-        <select
-          className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          value={prefs.tone}
-          onChange={(e) => handleChange('tone', e.target.value)}
-        >
-          <option value="neutral">Neutral</option>
-          <option value="formal">Formal</option>
-          <option value="casual">Casual</option>
-          <option value="playful">Playful</option>
-        </select>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Card wrapper for styling */}
+      <div className="rounded-2xl border border-zinc-700 bg-zinc-900 p-6 md:p-8 space-y-6">
+        <div>
+          <h2 className="text-lg font-semibold text-white">Customize your digest</h2>
+          <p className="mt-1 text-xs text-zinc-400">
+            Choose how InfoBlob should craft your summaries and digests.
+          </p>
+        </div>
+
+        {/* Preference grid */}
+        <div className="space-y-4">
+          {/* Tone */}
+          <div>
+            <label className="block text-sm text-zinc-300 mb-1">Tone</label>
+            <select
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
+              value={prefs.tone}
+              onChange={(e) => handleChange('tone', e.target.value)}
+            >
+              <option value="neutral">Neutral</option>
+              <option value="formal">Formal</option>
+              <option value="casual">Casual</option>
+              <option value="playful">Playful</option>
+            </select>
+          </div>
+
+          {/* Format */}
+          <div>
+            <label className="block text-sm text-zinc-300 mb-1">Format</label>
+            <select
+              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
+                isBasic
+                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
+                  : 'border-zinc-700 bg-zinc-900'
+              }`}
+              value={prefs.format}
+              onChange={(e) => handleChange('format', e.target.value)}
+              disabled={isBasic}
+            >
+              <option value="bullets_then_takeaway">Bullets then takeaway</option>
+              <option value="paragraph">Paragraph</option>
+            </select>
+          </div>
+
+          {/* Audience */}
+          <div>
+            <label className="block text-sm text-zinc-300 mb-1">Audience</label>
+            <input
+              type="text"
+              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
+                isBasic
+                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
+                  : 'border-zinc-700 bg-zinc-900'
+              }`}
+              value={prefs.audience}
+              onChange={(e) => handleChange('audience', e.target.value)}
+              disabled={isBasic}
+              placeholder="general, technical, etc."
+            />
+          </div>
+
+          {/* Length */}
+          <div>
+            <label className="block text-sm text-zinc-300 mb-1">Length</label>
+            <select
+              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
+                isBasic
+                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
+                  : 'border-zinc-700 bg-zinc-900'
+              }`}
+              value={prefs.length}
+              onChange={(e) => handleChange('length', e.target.value)}
+              disabled={isBasic}
+            >
+              <option value="short">Short</option>
+              <option value="medium">Medium</option>
+              <option value="long">Long</option>
+            </select>
+          </div>
+
+          {/* Stance */}
+          <div>
+            <label className="block text-sm text-zinc-300 mb-1">Stance</label>
+            <select
+              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
+                isBasic
+                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
+                  : 'border-zinc-700 bg-zinc-900'
+              }`}
+              value={prefs.stance}
+              onChange={(e) => handleChange('stance', e.target.value)}
+              disabled={isBasic}
+            >
+              <option value="strictly_neutral">Strictly neutral</option>
+              <option value="positive">Positive</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+
+          {/* Emoji */}
+          <div>
+            <label className="block text-sm text-zinc-300 mb-1">Emoji</label>
+            <select
+              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
+                isBasic
+                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
+                  : 'border-zinc-700 bg-zinc-900'
+              }`}
+              value={prefs.emoji}
+              onChange={(e) => handleChange('emoji', e.target.value)}
+              disabled={isBasic}
+            >
+              <option value="none">None</option>
+              <option value="minimal">Minimal</option>
+              <option value="frequent">Frequent</option>
+            </select>
+          </div>
+
+          {/* Call to action */}
+          <div>
+            <label className="block text-sm text-zinc-300 mb-1">Call to action</label>
+            <input
+              type="text"
+              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
+                isBasic
+                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
+                  : 'border-zinc-700 bg-zinc-900'
+              }`}
+              value={prefs.cta}
+              onChange={(e) => handleChange('cta', e.target.value)}
+              disabled={isBasic}
+              placeholder="e.g. read_more, subscribe"
+            />
+          </div>
+
+          {/* Personality preset */}
+          <div>
+            <label className="block text-sm text-zinc-300 mb-1">Personality preset</label>
+            <input
+              type="text"
+              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
+                isBasic
+                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
+                  : 'border-zinc-700 bg-zinc-900'
+              }`}
+              value={preset}
+              onChange={(e) => setPreset(e.target.value)}
+              disabled={isBasic}
+              placeholder="executive_brief"
+            />
+          </div>
+        </div>
+
+        {/* Save or upgrade */}
+        <div>
+          {isBasic ? (
+            <UpgradeNotice message="Editing writing preferences beyond Tone is a Pro feature." />
+          ) : (
+            <button
+              type="submit"
+              disabled={saving}
+              className="mt-4 rounded-lg bg-white px-5 py-2 text-sm font-medium text-black hover:bg-zinc-100 transition"
+            >
+              {saving ? 'Saving…' : 'Save preferences'}
+            </button>
+          )}
+          {message && <p className="mt-2 text-xs text-zinc-400">{message}</p>}
+        </div>
       </div>
-
-      {/* Format */}
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Format</label>
-        <select
-          className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          value={prefs.format}
-          onChange={(e) => handleChange('format', e.target.value)}
-          disabled={isBasic}
-        >
-          <option value="bullets_then_takeaway">Bullets then takeaway</option>
-          <option value="paragraph">Paragraph</option>
-        </select>
-      </div>
-
-      {/* Audience */}
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Audience</label>
-        <input
-          className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          value={prefs.audience}
-          onChange={(e) => handleChange('audience', e.target.value)}
-          disabled={isBasic}
-          placeholder="general, technical, etc."
-        />
-      </div>
-
-      {/* Length */}
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Length</label>
-        <select
-          className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          value={prefs.length}
-          onChange={(e) => handleChange('length', e.target.value)}
-          disabled={isBasic}
-        >
-          <option value="short">Short</option>
-          <option value="medium">Medium</option>
-          <option value="long">Long</option>
-        </select>
-      </div>
-
-      {/* Stance */}
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Stance</label>
-        <select
-          className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          value={prefs.stance}
-          onChange={(e) => handleChange('stance', e.target.value)}
-          disabled={isBasic}
-        >
-          <option value="strictly_neutral">Strictly neutral</option>
-          <option value="positive">Positive</option>
-          <option value="critical">Critical</option>
-        </select>
-      </div>
-
-      {/* Emoji */}
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Emoji</label>
-        <select
-          className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          value={prefs.emoji}
-          onChange={(e) => handleChange('emoji', e.target.value)}
-          disabled={isBasic}
-        >
-          <option value="none">None</option>
-          <option value="minimal">Minimal</option>
-          <option value="frequent">Frequent</option>
-        </select>
-      </div>
-
-      {/* Call to Action */}
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Call to action</label>
-        <input
-          className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          value={prefs.cta}
-          onChange={(e) => handleChange('cta', e.target.value)}
-          disabled={isBasic}
-          placeholder="read_more, subscribe, etc."
-        />
-      </div>
-
-      {/* Personality preset */}
-      <div>
-        <label className="block text-sm text-zinc-400 mb-1">Personality preset</label>
-        <input
-          className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          value={preset}
-          onChange={(e) => setPreset(e.target.value)}
-          disabled={isBasic}
-          placeholder="executive_brief"
-        />
-      </div>
-
-      {/* Save button or upgrade notice */}
-      {isBasic ? (
-        <UpgradeNotice message="Editing writing preferences beyond Tone is a Pro feature." />
-      ) : (
-        <button
-          type="submit"
-          disabled={saving}
-          className="rounded-md bg-white px-4 py-2 text-sm font-semibold text-black hover:bg-zinc-100 transition"
-        >
-          {saving ? 'Saving…' : 'Save preferences'}
-        </button>
-      )}
-
-      {message && <p className="text-xs text-zinc-400 mt-2">{message}</p>}
     </form>
   );
 }
