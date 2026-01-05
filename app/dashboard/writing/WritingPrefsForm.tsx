@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
+import UpgradeNotice from '../UpgradeNotice';
 
 interface WritingPrefs {
   tone: string;
@@ -21,6 +22,10 @@ interface Props {
   plan: string;
 }
 
+/**
+ * Writing preferences form.  Basic plan users can only edit Tone;
+ * all other fields are disabled and an upgrade notice is shown instead of the save button.
+ */
 export default function WritingPrefsForm({
   initialPrefs,
   initialPreset,
@@ -33,7 +38,8 @@ export default function WritingPrefsForm({
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const isFree = plan?.toLowerCase() === 'free';
+  const isPro = (plan ?? '').toLowerCase() === 'pro';
+  const isBasic = !isPro;
 
   const handleChange = (field: keyof WritingPrefs, value: string) => {
     setPrefs((prev) => ({
@@ -46,6 +52,7 @@ export default function WritingPrefsForm({
     e.preventDefault();
     setSaving(true);
     setMessage(null);
+
     const { error } = await supabase
       .from('users_table')
       .update({
@@ -53,6 +60,7 @@ export default function WritingPrefsForm({
         personality_preset: preset,
       })
       .eq('id', userId);
+
     setSaving(false);
     if (error) {
       setMessage('Error saving preferences: ' + error.message);
@@ -62,31 +70,30 @@ export default function WritingPrefsForm({
   };
 
   return (
-    <form className="space-y-4 max-w-xl" onSubmit={handleSubmit}>
-      {/* Tone */}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Tone (editable on both plans) */}
       <div>
-        <label className="block text-xs text-zinc-400 mb-1">Tone</label>
+        <label className="block text-sm text-zinc-400 mb-1">Tone</label>
         <select
           className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
           value={prefs.tone}
           onChange={(e) => handleChange('tone', e.target.value)}
-          disabled={isFree}
         >
           <option value="neutral">Neutral</option>
-          <option value="casual">Casual</option>
           <option value="formal">Formal</option>
+          <option value="casual">Casual</option>
           <option value="playful">Playful</option>
         </select>
       </div>
 
       {/* Format */}
       <div>
-        <label className="block text-xs text-zinc-400 mb-1">Format</label>
+        <label className="block text-sm text-zinc-400 mb-1">Format</label>
         <select
           className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
           value={prefs.format}
           onChange={(e) => handleChange('format', e.target.value)}
-          disabled={isFree}
+          disabled={isBasic}
         >
           <option value="bullets_then_takeaway">Bullets then takeaway</option>
           <option value="paragraph">Paragraph</option>
@@ -95,24 +102,24 @@ export default function WritingPrefsForm({
 
       {/* Audience */}
       <div>
-        <label className="block text-xs text-zinc-400 mb-1">Audience</label>
+        <label className="block text-sm text-zinc-400 mb-1">Audience</label>
         <input
           className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          placeholder="general, technical, etc."
           value={prefs.audience}
           onChange={(e) => handleChange('audience', e.target.value)}
-          disabled={isFree}
+          disabled={isBasic}
+          placeholder="general, technical, etc."
         />
       </div>
 
       {/* Length */}
       <div>
-        <label className="block text-xs text-zinc-400 mb-1">Length</label>
+        <label className="block text-sm text-zinc-400 mb-1">Length</label>
         <select
           className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
           value={prefs.length}
           onChange={(e) => handleChange('length', e.target.value)}
-          disabled={isFree}
+          disabled={isBasic}
         >
           <option value="short">Short</option>
           <option value="medium">Medium</option>
@@ -122,12 +129,12 @@ export default function WritingPrefsForm({
 
       {/* Stance */}
       <div>
-        <label className="block text-xs text-zinc-400 mb-1">Stance</label>
+        <label className="block text-sm text-zinc-400 mb-1">Stance</label>
         <select
           className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
           value={prefs.stance}
           onChange={(e) => handleChange('stance', e.target.value)}
-          disabled={isFree}
+          disabled={isBasic}
         >
           <option value="strictly_neutral">Strictly neutral</option>
           <option value="positive">Positive</option>
@@ -137,12 +144,12 @@ export default function WritingPrefsForm({
 
       {/* Emoji */}
       <div>
-        <label className="block text-xs text-zinc-400 mb-1">Emoji</label>
+        <label className="block text-sm text-zinc-400 mb-1">Emoji</label>
         <select
           className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
           value={prefs.emoji}
           onChange={(e) => handleChange('emoji', e.target.value)}
-          disabled={isFree}
+          disabled={isBasic}
         >
           <option value="none">None</option>
           <option value="minimal">Minimal</option>
@@ -150,41 +157,33 @@ export default function WritingPrefsForm({
         </select>
       </div>
 
-      {/* CTA */}
+      {/* Call to Action */}
       <div>
-        <label className="block text-xs text-zinc-400 mb-1">Call to action</label>
+        <label className="block text-sm text-zinc-400 mb-1">Call to action</label>
         <input
           className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          placeholder="read_more, subscribe, etc."
           value={prefs.cta}
           onChange={(e) => handleChange('cta', e.target.value)}
-          disabled={isFree}
+          disabled={isBasic}
+          placeholder="read_more, subscribe, etc."
         />
       </div>
 
       {/* Personality preset */}
       <div>
-        <label className="block text-xs text-zinc-400 mb-1">
-          Personality preset
-        </label>
+        <label className="block text-sm text-zinc-400 mb-1">Personality preset</label>
         <input
           className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-sm text-zinc-100"
-          placeholder="executive_brief"
           value={preset}
           onChange={(e) => setPreset(e.target.value)}
-          disabled={isFree}
+          disabled={isBasic}
+          placeholder="executive_brief"
         />
       </div>
 
-      {/* Submit or upgrade prompt */}
-      {isFree ? (
-        <p className="text-xs text-zinc-500 mt-2">
-          Editing writing preferences is a Pro feature.{' '}
-          <a href="/pricing" className="underline">
-            Upgrade
-          </a>{' '}
-          to enable custom settings.
-        </p>
+      {/* Save button or upgrade notice */}
+      {isBasic ? (
+        <UpgradeNotice message="Editing writing preferences beyond Tone is a Pro feature." />
       ) : (
         <button
           type="submit"
