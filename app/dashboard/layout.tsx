@@ -17,7 +17,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
 
-  // --- PLAN LOADING (client-side) ---
+  // Client-side plan loading (so our sidebar shows the proper plan)
   const supabase = createClient();
   const [plan, setPlan] = useState<string>('basic');
   const [loadingPlan, setLoadingPlan] = useState(true);
@@ -26,37 +26,32 @@ export default function DashboardLayout({
     let mounted = true;
 
     async function loadPlan() {
-      try {
-        setLoadingPlan(true);
+      setLoadingPlan(true);
 
-        const {
-          data: { user },
-          error: userErr,
-        } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: userErr,
+      } = await supabase.auth.getUser();
 
-        if (userErr || !user) {
-          // If not logged in, default to basic; your middleware/route protection should redirect anyway
-          if (mounted) setPlan('basic');
-          return;
-        }
-
-        // Read plan from customers (switch to users_table if you prefer)
-        const { data, error } = await supabase
-          .from('customers')
-          .select('plan,status')
-          .eq('id', user.id)
-          .single<PlanRow>();
-
-        if (error) {
-          if (mounted) setPlan('basic');
-          return;
-        }
-
-        // If status is inactive for any reason, still treat as basic in UI
-        if (mounted) setPlan((data?.plan ?? 'basic').toLowerCase());
-      } finally {
-        if (mounted) setLoadingPlan(false);
+      if (userErr || !user) {
+        if (mounted) setPlan('basic');
+        setLoadingPlan(false);
+        return;
       }
+
+      const { data, error } = await supabase
+        .from('customers')
+        .select('plan,status')
+        .eq('id', user.id)
+        .single<PlanRow>();
+
+      if (error) {
+        if (mounted) setPlan('basic');
+      } else {
+        if (mounted) setPlan((data?.plan ?? 'basic').toLowerCase());
+      }
+
+      setLoadingPlan(false);
     }
 
     loadPlan();
@@ -76,7 +71,7 @@ export default function DashboardLayout({
   return (
     <PlanGateProvider plan={plan}>
       <div className="min-h-screen bg-black text-white flex">
-        {/* Vertical sidebar with icons */}
+        {/* Sidebar */}
         <aside className="w-56 border-r border-zinc-800 bg-zinc-950">
           <nav className="py-6">
             {/* Plan badge */}
@@ -87,7 +82,7 @@ export default function DashboardLayout({
                   <span className="text-sm font-medium">
                     {loadingPlan ? 'Loading…' : plan?.toUpperCase()}
                   </span>
-                  {String(plan).toLowerCase() !== 'pro' ? (
+                  {plan.toLowerCase() !== 'pro' ? (
                     <Link
                       href="/pricing"
                       className="text-xs text-pink-400 hover:text-pink-300"
@@ -123,8 +118,6 @@ export default function DashboardLayout({
             </ul>
           </nav>
         </aside>
-
-        {/* Main content */}
         <main className="flex-1 p-6">{children}</main>
       </div>
     </PlanGateProvider>
