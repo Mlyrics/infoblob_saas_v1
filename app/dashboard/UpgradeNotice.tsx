@@ -1,7 +1,12 @@
+// app/dashboard/UpgradeNotice.tsx
 'use client';
 
 import Link from 'next/link';
 
+/**
+ * A reusable component that encourages users to upgrade.
+ * Customize the default message as needed.
+ */
 export default function UpgradeNotice({
   message = 'Upgrade to Pro to unlock this feature.',
 }: {
