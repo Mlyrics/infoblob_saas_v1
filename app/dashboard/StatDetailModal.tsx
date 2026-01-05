@@ -18,11 +18,11 @@ interface ModalProps {
 }
 
 /**
- * StatDetailModal shows a list of items for a selected stat:
- *  - generated / delivered: counts articles grouped by topic and subtopic.
- *  - topics: lists active topics.
- *  - integrations: lists active integrations.
- *  - aiCredits: reserved for future expansion.
+ * Displays detailed lists for a selected stat:
+ * - generated/delivered: groups articles by topic and subtopic and counts them.
+ * - topics: lists active topics
+ * - integrations: lists active integrations
+ * - aiCredits: reserved for future use
  */
 export default function StatDetailModal({
   open,
@@ -45,83 +45,82 @@ export default function StatDetailModal({
       setLoading(true);
       const supabase: any = createClient();
 
-      if (statType === 'generated') {
-        // Fetch all articles created in the last 30 days (no distributed filter)
-        const { data, error } = await supabase
-          .from('customer_article')
-          .select('topic_code, subtopic')
-          .eq('customer_id', userId)
-          .gte(
-            'created_at',
-            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          );
-        if (error) {
-          console.error(error);
+      try {
+        if (statType === 'generated') {
+          // fetch all articles created in last 30 days
+          const { data, error } = await supabase
+            .from('customer_article')
+            .select('topic_code, subtopic')
+            .eq('customer_id', userId)
+            .gte(
+              'created_at',
+              new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+            );
+          if (error) throw error;
+          if (data) {
+            const map: { [key: string]: number } = {};
+            data.forEach((row: any) => {
+              const key = `${row.topic_code}|${row.subtopic ?? ''}`;
+              map[key] = (map[key] || 0) + 1;
+            });
+            const grouped = Object.entries(map).map(([key, count]) => {
+              const [topic_code, subtopic] = key.split('|');
+              return { topic_code, subtopic: subtopic || null, count };
+            });
+            setItems(grouped);
+          }
+        } else if (statType === 'delivered') {
+          // fetch distributed articles
+          const { data, error } = await supabase
+            .from('customer_article')
+            .select('topic_code, subtopic')
+            .eq('customer_id', userId)
+            .eq('distributed', true)
+            .gte(
+              'distributed_at',
+              new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+            );
+          if (error) throw error;
+          if (data) {
+            const map: { [key: string]: number } = {};
+            data.forEach((row: any) => {
+              const key = `${row.topic_code}|${row.subtopic ?? ''}`;
+              map[key] = (map[key] || 0) + 1;
+            });
+            const grouped = Object.entries(map).map(([key, count]) => {
+              const [topic_code, subtopic] = key.split('|');
+              return { topic_code, subtopic: subtopic || null, count };
+            });
+            setItems(grouped);
+          }
+        } else if (statType === 'topics') {
+          const { data } = await supabase
+            .from('customer_topics')
+            .select('topic_code, custom_tags, rss_url, is_active')
+            .eq('customer_id', userId)
+            .eq('is_active', true);
+          setItems(data ?? []);
+        } else if (statType === 'integrations') {
+          const { data } = await supabase
+            .from('customer_integrations')
+            .select('channel, is_active, config')
+            .eq('customer_id', userId)
+            .eq('is_active', true);
+          setItems(data ?? []);
+        } else {
           setItems([]);
-        } else if (data) {
-          const map: { [key: string]: number } = {};
-          data.forEach((row: any) => {
-            const key = `${row.topic_code}|${row.subtopic || ''}`;
-            map[key] = (map[key] || 0) + 1;
-          });
-          const grouped = Object.entries(map).map(([key, count]) => {
-            const [topic_code, subtopic] = key.split('|');
-            return { topic_code, subtopic: subtopic || null, count };
-          });
-          setItems(grouped);
         }
-      } else if (statType === 'delivered') {
-        // Fetch only distributed articles created within the last 30 days
-        const { data, error } = await supabase
-          .from('customer_article')
-          .select('topic_code, subtopic')
-          .eq('customer_id', userId)
-          .eq('distributed', true)
-          .gte(
-            'distributed_at',
-            new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-          );
-        if (error) {
-          console.error(error);
-          setItems([]);
-        } else if (data) {
-          const map: { [key: string]: number } = {};
-          data.forEach((row: any) => {
-            const key = `${row.topic_code}|${row.subtopic || ''}`;
-            map[key] = (map[key] || 0) + 1;
-          });
-          const grouped = Object.entries(map).map(([key, count]) => {
-            const [topic_code, subtopic] = key.split('|');
-            return { topic_code, subtopic: subtopic || null, count };
-          });
-          setItems(grouped);
-        }
-      } else if (statType === 'topics') {
-        const { data } = await supabase
-          .from('customer_topics')
-          .select('topic_code, custom_tags, rss_url, is_active')
-          .eq('customer_id', userId)
-          .eq('is_active', true);
-        setItems(data ?? []);
-      } else if (statType === 'integrations') {
-        const { data } = await supabase
-          .from('customer_integrations')
-          .select('channel, is_active, config')
-          .eq('customer_id', userId)
-          .eq('is_active', true);
-        setItems(data ?? []);
-      } else {
-        // aiCredits or unsupported type
+      } catch (e) {
+        console.error(e);
         setItems([]);
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     fetchDetails();
   }, [open, statType, userId]);
 
-  // Titles for each stat type
   const titleMap: Record<string, string> = {
     generated: 'Articles generated (30d)',
     delivered: 'Articles delivered (30d)',
