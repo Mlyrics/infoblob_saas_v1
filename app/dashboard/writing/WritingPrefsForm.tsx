@@ -4,6 +4,16 @@
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import UpgradeNotice from '../UpgradeNotice';
+import {
+  Music,
+  List,
+  Users,
+  Ruler,
+  Scale,
+  Smile,
+  Megaphone,
+  Brain,
+} from 'lucide-react';
 
 interface WritingPrefs {
   tone: string;
@@ -22,9 +32,6 @@ interface Props {
   plan: string;
 }
 
-/**
- * Writing preferences form. Basic plan: only Tone is editable; all other fields are disabled and the upgrade notice is shown.
- */
 export default function WritingPrefsForm({
   initialPrefs,
   initialPreset,
@@ -66,162 +73,183 @@ export default function WritingPrefsForm({
     }
   };
 
+  // Helper for disabled styling
+  function disabledClasses(disabled: boolean) {
+    return disabled
+      ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
+      : 'border-zinc-700 bg-zinc-900';
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Card wrapper for styling */}
+      {/* Card wrapper with header */}
       <div className="rounded-2xl border border-zinc-700 bg-zinc-900 p-6 md:p-8 space-y-6">
         <div>
-          <h2 className="text-lg font-semibold text-white">Customize your digest</h2>
+          <h2 className="text-lg font-semibold text-white">
+            Customize your digest
+          </h2>
           <p className="mt-1 text-xs text-zinc-400">
             Choose how InfoBlob should craft your summaries and digests.
           </p>
         </div>
 
-        {/* Preference grid */}
-        <div className="space-y-4">
+        {/* Tile grid */}
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Tone */}
-          <div>
-            <label className="block text-sm text-zinc-300 mb-1">Tone</label>
-            <select
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
-              value={prefs.tone}
-              onChange={(e) => handleChange('tone', e.target.value)}
-            >
-              <option value="neutral">Neutral</option>
-              <option value="formal">Formal</option>
-              <option value="casual">Casual</option>
-              <option value="playful">Playful</option>
-            </select>
+          <div className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+            <div className="p-2 rounded-full bg-zinc-800 text-pink-500">
+              <Music size={16} />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-zinc-400 mb-1">Tone</label>
+              <select
+                className="w-full rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
+                value={prefs.tone}
+                onChange={(e) => handleChange('tone', e.target.value)}
+              >
+                <option value="neutral">Neutral</option>
+                <option value="formal">Formal</option>
+                <option value="casual">Casual</option>
+                <option value="playful">Playful</option>
+              </select>
+            </div>
           </div>
 
           {/* Format */}
-          <div>
-            <label className="block text-sm text-zinc-300 mb-1">Format</label>
-            <select
-              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
-                isBasic
-                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
-                  : 'border-zinc-700 bg-zinc-900'
-              }`}
-              value={prefs.format}
-              onChange={(e) => handleChange('format', e.target.value)}
-              disabled={isBasic}
-            >
-              <option value="bullets_then_takeaway">Bullets then takeaway</option>
-              <option value="paragraph">Paragraph</option>
-            </select>
+          <div className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+            <div className="p-2 rounded-full bg-zinc-800 text-pink-500">
+              <List size={16} />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-zinc-400 mb-1">Format</label>
+              <select
+                className={`w-full rounded-md border px-3 py-2 text-sm text-zinc-100 ${disabledClasses(isBasic)}`}
+                value={prefs.format}
+                onChange={(e) => handleChange('format', e.target.value)}
+                disabled={isBasic}
+              >
+                <option value="bullets_then_takeaway">Bullets then takeaway</option>
+                <option value="paragraph">Paragraph</option>
+              </select>
+            </div>
           </div>
 
           {/* Audience */}
-          <div>
-            <label className="block text-sm text-zinc-300 mb-1">Audience</label>
-            <input
-              type="text"
-              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
-                isBasic
-                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
-                  : 'border-zinc-700 bg-zinc-900'
-              }`}
-              value={prefs.audience}
-              onChange={(e) => handleChange('audience', e.target.value)}
-              disabled={isBasic}
-              placeholder="general, technical, etc."
-            />
+          <div className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+            <div className="p-2 rounded-full bg-zinc-800 text-pink-500">
+              <Users size={16} />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-zinc-400 mb-1">Audience</label>
+              <input
+                type="text"
+                className={`w-full rounded-md border px-3 py-2 text-sm text-zinc-100 ${disabledClasses(isBasic)}`}
+                value={prefs.audience}
+                onChange={(e) => handleChange('audience', e.target.value)}
+                disabled={isBasic}
+                placeholder="general, technical, etc."
+              />
+            </div>
           </div>
 
           {/* Length */}
-          <div>
-            <label className="block text-sm text-zinc-300 mb-1">Length</label>
-            <select
-              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
-                isBasic
-                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
-                  : 'border-zinc-700 bg-zinc-900'
-              }`}
-              value={prefs.length}
-              onChange={(e) => handleChange('length', e.target.value)}
-              disabled={isBasic}
-            >
-              <option value="short">Short</option>
-              <option value="medium">Medium</option>
-              <option value="long">Long</option>
-            </select>
+          <div className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+            <div className="p-2 rounded-full bg-zinc-800 text-pink-500">
+              <Ruler size={16} />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-zinc-400 mb-1">Length</label>
+              <select
+                className={`w-full rounded-md border px-3 py-2 text-sm text-zinc-100 ${disabledClasses(isBasic)}`}
+                value={prefs.length}
+                onChange={(e) => handleChange('length', e.target.value)}
+                disabled={isBasic}
+              >
+                <option value="short">Short</option>
+                <option value="medium">Medium</option>
+                <option value="long">Long</option>
+              </select>
+            </div>
           </div>
 
           {/* Stance */}
-          <div>
-            <label className="block text-sm text-zinc-300 mb-1">Stance</label>
-            <select
-              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
-                isBasic
-                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
-                  : 'border-zinc-700 bg-zinc-900'
-              }`}
-              value={prefs.stance}
-              onChange={(e) => handleChange('stance', e.target.value)}
-              disabled={isBasic}
-            >
-              <option value="strictly_neutral">Strictly neutral</option>
-              <option value="positive">Positive</option>
-              <option value="critical">Critical</option>
-            </select>
+          <div className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+            <div className="p-2 rounded-full bg-zinc-800 text-pink-500">
+              <Scale size={16} />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-zinc-400 mb-1">Stance</label>
+              <select
+                className={`w-full rounded-md border px-3 py-2 text-sm text-zinc-100 ${disabledClasses(isBasic)}`}
+                value={prefs.stance}
+                onChange={(e) => handleChange('stance', e.target.value)}
+                disabled={isBasic}
+              >
+                <option value="strictly_neutral">Strictly neutral</option>
+                <option value="positive">Positive</option>
+                <option value="critical">Critical</option>
+              </select>
+            </div>
           </div>
 
           {/* Emoji */}
-          <div>
-            <label className="block text-sm text-zinc-300 mb-1">Emoji</label>
-            <select
-              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
-                isBasic
-                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
-                  : 'border-zinc-700 bg-zinc-900'
-              }`}
-              value={prefs.emoji}
-              onChange={(e) => handleChange('emoji', e.target.value)}
-              disabled={isBasic}
-            >
-              <option value="none">None</option>
-              <option value="minimal">Minimal</option>
-              <option value="frequent">Frequent</option>
-            </select>
+          <div className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+            <div className="p-2 rounded-full bg-zinc-800 text-pink-500">
+              <Smile size={16} />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-zinc-400 mb-1">Emoji</label>
+              <select
+                className={`w-full rounded-md border px-3 py-2 text-sm text-zinc-100 ${disabledClasses(isBasic)}`}
+                value={prefs.emoji}
+                onChange={(e) => handleChange('emoji', e.target.value)}
+                disabled={isBasic}
+              >
+                <option value="none">None</option>
+                <option value="minimal">Minimal</option>
+                <option value="frequent">Frequent</option>
+              </select>
+            </div>
           </div>
 
           {/* Call to action */}
-          <div>
-            <label className="block text-sm text-zinc-300 mb-1">Call to action</label>
-            <input
-              type="text"
-              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
-                isBasic
-                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
-                  : 'border-zinc-700 bg-zinc-900'
-              }`}
-              value={prefs.cta}
-              onChange={(e) => handleChange('cta', e.target.value)}
-              disabled={isBasic}
-              placeholder="e.g. read_more, subscribe"
-            />
+          <div className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+            <div className="p-2 rounded-full bg-zinc-800 text-pink-500">
+              <Megaphone size={16} />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-zinc-400 mb-1">Call to action</label>
+              <input
+                type="text"
+                className={`w-full rounded-md border px-3 py-2 text-sm text-zinc-100 ${disabledClasses(isBasic)}`}
+                value={prefs.cta}
+                onChange={(e) => handleChange('cta', e.target.value)}
+                disabled={isBasic}
+                placeholder="read_more, subscribe, etc."
+              />
+            </div>
           </div>
 
           {/* Personality preset */}
-          <div>
-            <label className="block text-sm text-zinc-300 mb-1">Personality preset</label>
-            <input
-              type="text"
-              className={`w-full rounded-lg border px-3 py-2 text-sm text-zinc-100 ${
-                isBasic
-                  ? 'border-zinc-800 bg-zinc-950 opacity-60 cursor-not-allowed'
-                  : 'border-zinc-700 bg-zinc-900'
-              }`}
-              value={preset}
-              onChange={(e) => setPreset(e.target.value)}
-              disabled={isBasic}
-              placeholder="executive_brief"
-            />
+          <div className="flex items-center gap-4 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
+            <div className="p-2 rounded-full bg-zinc-800 text-pink-500">
+              <Brain size={16} />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-zinc-400 mb-1">Personality preset</label>
+              <input
+                type="text"
+                className={`w-full rounded-md border px-3 py-2 text-sm text-zinc-100 ${disabledClasses(isBasic)}`}
+                value={preset}
+                onChange={(e) => setPreset(e.target.value)}
+                disabled={isBasic}
+                placeholder="executive_brief"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Save or upgrade */}
+        {/* Save button or upgrade notice */}
         <div>
           {isBasic ? (
             <UpgradeNotice message="Editing writing preferences beyond Tone is a Pro feature." />
