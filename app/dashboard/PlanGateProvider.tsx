@@ -1,6 +1,7 @@
+// app/dashboard/PlanGateProvider.tsx
 'use client';
 
-import React, { createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { normalizePlan, PLAN_LIMITS, type Plan } from '@/utils/plan';
 
 type PlanGate = {
@@ -12,6 +13,10 @@ type PlanGate = {
 
 const PlanGateContext = createContext<PlanGate | null>(null);
 
+/**
+ * PlanGateProvider exposes the current user's plan, flags for Pro/Free,
+ * and the defined limits via context.  Wrap dashboard pages with this.
+ */
 export function PlanGateProvider({
   plan,
   children,
@@ -35,7 +40,7 @@ export function PlanGateProvider({
 }
 
 export function usePlanGate() {
-  const ctx = useContext(PlanGateContext);
-  if (!ctx) throw new Error('usePlanGate must be used inside PlanGateProvider');
-  return ctx;
+  const context = useContext(PlanGateContext);
+  if (!context) throw new Error('usePlanGate must be used within PlanGateProvider');
+  return context;
 }
