@@ -1,34 +1,40 @@
 // app/dashboard/integrations/page.tsx
 import { createClient } from '@/utils/supabase/server';
-import { getUser } from '@/utils/supabase/queries';
 import { redirect } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { getUser } from '@/utils/supabase/queries';
 
-const IntegrationListClient = dynamic(() => import('./IntegrationListClient'), {
-  ssr: false
-});
+// Client-only IntegrationList component
+const IntegrationListClient = dynamic(
+  () => import('./IntegrationListClient'),
+  { ssr: false },
+);
 
 export default async function IntegrationsPage() {
-  const supabase = createClient();
+  const supabase: any = createClient();
   const user = await getUser(supabase);
+
   if (!user) {
     return redirect('/signin');
   }
 
-  const { data: planRow } = await (supabase as any)
-    .from('users_table')
+  // Fetch plan
+  const { data: planRow } = await supabase
+    .from('customers')
     .select('plan')
     .eq('id', user.id)
     .maybeSingle();
-  const plan = planRow?.plan ?? 'free';
 
-  const { data: integrations } = await (supabase as any)
+  const plan = (planRow?.plan ?? 'basic').toLowerCase();
+
+  // Fetch existing integrations for the user
+  const { data: integrations } = await supabase
     .from('customer_integrations')
-    .select('channel, is_active, config')
+    .select('*')
     .eq('customer_id', user.id);
 
   return (
-    <div>
+    <div className="max-w-4xl mx-auto">
       <h1 className="mb-4 text-2xl font-bold">Integrations</h1>
       <IntegrationListClient
         integrations={integrations ?? []}
