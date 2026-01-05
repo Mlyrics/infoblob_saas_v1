@@ -1,13 +1,13 @@
 // utils/plan.ts
 export type Plan = 'basic' | 'pro';
 
-/** Normalize any incoming plan string to our internal Plan type. */
+/** Normalize any plan string to our internal Plan type */
 export function normalizePlan(input: string | null | undefined): Plan {
   const p = (input ?? '').toLowerCase();
   return p === 'pro' ? 'pro' : 'basic';
 }
 
-/** Limits for each plan.  Modify these values to adjust gating. */
+/** Limits and allowed features per plan */
 export const PLAN_LIMITS = {
   basic: {
     maxActiveTopics: 3,
@@ -23,7 +23,7 @@ export const PLAN_LIMITS = {
   },
 } as const;
 
-/** Helper for quickly checking if a plan is Pro. */
+/** Convenience helper */
 export function isPro(plan: Plan) {
   return plan === 'pro';
 }
