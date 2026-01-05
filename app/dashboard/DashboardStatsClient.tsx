@@ -21,12 +21,15 @@ interface Props {
   userId: string;
 }
 
+/**
+ * Renders a grid of five clickable stat cards with sparkline charts,
+ * and opens a modal on click.
+ */
 export default function DashboardStatsClient({
   stats,
   dailyData,
   userId,
 }: Props) {
-  // Prepare sparkline data
   const generatedTrend = dailyData.map((row) => ({
     date: row.day,
     value: row.generated,
@@ -108,7 +111,7 @@ export default function DashboardStatsClient({
         </div>
       </section>
 
-      {/* Detail modal */}
+      {/* Modal */}
       <StatDetailModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
