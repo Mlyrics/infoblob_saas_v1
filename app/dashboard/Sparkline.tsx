@@ -7,8 +7,7 @@ interface SparklineProps {
 }
 
 /**
- * A lightweight sparkline component that uses pure SVG.
- * The parent component should control width/height via CSS.
+ * A lightweight sparkline using SVG.  Parent controls its width & height via CSS.
  */
 export default function Sparkline({ data, stroke = '#a855f7' }: SparklineProps) {
   if (!data || data.length < 2) {
