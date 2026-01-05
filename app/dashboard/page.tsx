@@ -9,74 +9,37 @@ import {
   getSubscription,
 } from '@/utils/supabase/queries';
 
-// Dynamically import the client-only stats component (no SSR)
-const DashboardStatsClient = dynamic(() => import('./DashboardStatsClient'), {
-  ssr: false,
-});
+// Client-only stats component (no SSR)
+const DashboardStatsClient = dynamic(
+  () => import('./DashboardStatsClient'),
+  { ssr: false },
+);
 
 export default async function DashboardPage() {
-  // Cast Supabase client to any to bypass table/view type restrictions
   const supabase: any = createClient();
   const user = await getUser(supabase);
+
   if (!user) {
     return redirect('/signin');
   }
 
-  // Retrieve user details and plan/status
+  // Load user details and subscription info if needed
   const [userDetails] = await Promise.all([
     getUserDetails(supabase),
     getSubscription(supabase),
   ]);
 
-  const { data: userPlanRow } = await (supabase as any)
-    .from('users_table')
+  // Fetch plan and status (we use plan on the client too, but fetch here to pass to PlanGateProvider)
+  const { data: userPlanRow } = await supabase
+    .from('customers')
     .select('plan, status')
     .eq('id', user.id)
     .maybeSingle();
 
-  const planKey = (userPlanRow?.plan ?? 'free').toLowerCase();
-  const status = userPlanRow?.status ?? 'inactive';
+  const planLower = (userPlanRow?.plan ?? 'basic').toLowerCase();
 
-  // Determine plan label and badges
-  const planLabel =
-    planKey === 'agency'
-      ? 'Agency'
-      : planKey === 'pro'
-      ? 'Pro'
-      : planKey === 'basic'
-      ? 'Basic'
-      : 'Free';
-
-  const hasPaidSubscription =
-    ['basic', 'pro', 'agency'].includes(planKey) && status === 'active';
-
-  const PlanBadge = hasPaidSubscription ? (
-    <span className="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-100">
-      Plan: {planLabel}
-    </span>
-  ) : (
-    <Link
-      href="/pricing"
-      className="inline-flex items-center rounded-full border border-pink-500/80 bg-zinc-900 px-3 py-1 text-xs font-medium text-pink-200 hover:border-pink-400 hover:text-pink-100 transition"
-    >
-      Plan: Free · Choose a plan
-    </Link>
-  );
-
-  const StatusBadge = (
-    <span
-      className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${
-        status === 'active'
-          ? 'border-emerald-500/70 bg-emerald-500/10 text-emerald-300'
-          : 'border-zinc-700 bg-zinc-900 text-zinc-300'
-      }`}
-    >
-      Status: {status}
-    </span>
-  );
-
-  // Fetch aggregated stats from v_customer_dashboard_stats
-  const { data: statsRow } = await (supabase as any)
+  // Fetch aggregated stats
+  const { data: statsRow } = await supabase
     .from('v_customer_dashboard_stats')
     .select(
       'articles_generated_30d, articles_delivered_30d, active_topics, active_integrations, ai_credits_30d',
@@ -92,8 +55,8 @@ export default async function DashboardPage() {
     aiCredits: statsRow?.ai_credits_30d ?? 0,
   };
 
-  // Fetch daily data for sparkline charts from v_customer_articles_daily
-  const { data: dailyData } = await (supabase as any)
+  // Fetch 30-day trend data for sparkline charts
+  const { data: dailyData } = await supabase
     .from('v_customer_articles_daily')
     .select('day, generated, delivered')
     .eq('customer_id', user.id)
@@ -103,14 +66,24 @@ export default async function DashboardPage() {
     )
     .order('day', { ascending: true });
 
+  // Determine status label/badge for plan
+  const planLabel =
+    planLower === 'pro'
+      ? 'Pro'
+      : planLower === 'basic'
+      ? 'Basic'
+      : 'Basic';
+
+  const statusLabel = (userPlanRow?.status ?? 'inactive').toLowerCase();
+
   return (
     <main className="min-h-screen bg-black text-white">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8 sm:py-14">
-        {/* Header */}
+        {/* Header with plan/status badges */}
         <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs text-zinc-500">
-              Welcome back,{' '}
+              Welcome back,{` `}
               <span className="font-medium">
                 {userDetails?.full_name ?? user.email}
               </span>
@@ -123,11 +96,22 @@ export default async function DashboardPage() {
               automations will live once they’re wired in.
             </p>
           </div>
+
           <div className="flex flex-wrap items-center gap-3">
-            {PlanBadge}
-            {StatusBadge}
+            <span className="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-100">
+              Plan: {planLabel}
+            </span>
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                statusLabel === 'active'
+                  ? 'border-emerald-500/70 bg-emerald-500/10 text-emerald-300'
+                  : 'border-zinc-700 bg-zinc-900 text-zinc-300'
+              }`}
+            >
+              Status: {statusLabel}
+            </span>
             <Link
-              href="/account"
+              href="/dashboard/account"
               className="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-900 px-3 py-1 text-xs font-medium text-zinc-100 hover:bg-zinc-800 transition"
             >
               Manage account &amp; billing
@@ -135,7 +119,7 @@ export default async function DashboardPage() {
           </div>
         </header>
 
-        {/* Stats grid (client-rendered) */}
+        {/* Stats grid and modal (client-rendered) */}
         <DashboardStatsClient
           stats={stats}
           dailyData={dailyData ?? []}
@@ -149,8 +133,7 @@ export default async function DashboardPage() {
               Quick actions
             </h2>
             <p className="mt-1 text-xs text-zinc-500">
-              Start by managing topics, editing your writing style, and
-              connecting integrations.
+              Start by managing topics, editing your writing style, and connecting integrations.
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
               <Link
@@ -173,17 +156,4 @@ export default async function DashboardPage() {
               </Link>
               <Link
                 href="/dashboard/integrations"
-                className="rounded-lg border border-zinc-800 bg-zinc-900 px-4 py-3 text-left text-sm text-zinc-100 hover:border-zinc-600 hover:bg-zinc-900/70"
-              >
-                Integrations
-                <p className="mt-1 text-xs text-zinc-400">
-                  Connect Ghost or other platforms for publishing.
-                </p>
-              </Link>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-  );
-}
+                class just-copy-and-paste the full code as requested without summary
